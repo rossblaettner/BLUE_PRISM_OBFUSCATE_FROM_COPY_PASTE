@@ -47,15 +47,23 @@ For Each stage in stages
     ' xmlDoc2.selectSingleNode("stage/displayheight").Text = rndHgt
     ' xmlDoc2.selectSingleNode("stage/displaywidth").Text = rndWdt
 
+    nameAttribVal = stage.getAttribute("name")
     Set narrative = xmlDoc2.selectSingleNode("stage/narrative")
+    Set exposure = xmlDoc2.selectSingleNode("stage/exposure")
+    exposureValue = ""
 
     If Not narrative Is Nothing Then
       xmlDoc2.selectSingleNode("stage/narrative").Text = ""
     End If
 
-    name = xmlDoc2.selectSingleNode("stage").getAttribute("name")
-    xmlDoc2.selectSingleNode("stage").setAttribute  "name", toAlphaOnly(hashString(name))
+    If Not exposure Is Nothing Then
+        exposureValue = xmlDoc2.selectSingleNode("stage/exposure").Text
+    End If
 
+    If ( Not exposureValue = "Environment" ) Then
+        xmlDoc2.selectSingleNode("stage").setAttribute  "name", toAlphaOnly(hashString(nameAttribVal))
+   End If
+    
   ' Comment: Type of Blue Prism Stage
   ElseIf Not InStr( "|Start|End|", ( "|" & stage.getAttribute("type") & "|" )) > 0  Then
 
@@ -63,11 +71,35 @@ For Each stage in stages
 
   End If
 
+ If stage.getAttribute("type") = "Collection" Then
+ 
+    prepend = "*/"
+    resultCount = 1
+    source = stage.xml
+    target = stage.xml
+
+While resultCount > 0
+    Set fields = stage.selectNodes(prepend & "field[@name]")
+resultCount = fields.Length
+
+For Each field in fields
+        temp = Replace( field.xml, Chr(34) & field.getAttribute("name") & Chr(34), Chr(34) & toAlphaOnly(hashString(field.getAttribute("name")))  & Chr(34))
+        target = Replace( target, field.xml, temp)
+        Next
+        prepend = "*/" & prepend
+
+    WEnd
+
+xmlDoc2.loadXML( target )
+
+  End If
+
+
   ' Comment: Type of Blue Prism Stage
   If stage.getAttribute("type") = "Calculation" Then
 
-    'name = xmlDoc2.selectSingleNode("stage/calculation").getAttribute("stage")
-    'xmlDoc2.selectSingleNode("stage/calculation").setAttribute "stage", toAlphaOnly(hashString(name))
+    name = xmlDoc2.selectSingleNode("stage/calculation").getAttribute("stage")
+    xmlDoc2.selectSingleNode("stage/calculation").setAttribute "stage", toAlphaOnly(hashString(name))
     expression = xmlDoc2.selectSingleNode("stage/calculation").getAttribute("expression")
     xmlDoc2.selectSingleNode("stage/calculation").setAttribute "expression", hashDataNames(expression)
 
@@ -344,8 +376,8 @@ End Function
 '' SIG '' MIIP6QYJKoZIhvcNAQcCoIIP2jCCD9YCAQExCzAJBgUr
 '' SIG '' DgMCGgUAMGcGCisGAQQBgjcCAQSgWTBXMDIGCisGAQQB
 '' SIG '' gjcCAR4wJAIBAQQQTvApFpkntU2P5azhDxfrqwIBAAIB
-'' SIG '' AAIBAAIBAAIBADAhMAkGBSsOAwIaBQAEFCo7aREWMf+x
-'' SIG '' x5COifjKgHLprOhsoIINRDCCBh8wggUHoAMCAQICCmqx
+'' SIG '' AAIBAAIBAAIBADAhMAkGBSsOAwIaBQAEFBWSwLwRI4IJ
+'' SIG '' OepWoxNlA20m2y11oIINRDCCBh8wggUHoAMCAQICCmqx
 '' SIG '' yMsAAAAAAAgwDQYJKoZIhvcNAQELBQAwIjEgMB4GA1UE
 '' SIG '' AxMXQUhOQVQtQUhXQ0VSQUhOQVQwMDEtQ0EwHhcNMTkw
 '' SIG '' NDAzMDAwODIyWhcNMjkwNDAzMDAxODIyWjBhMRMwEQYK
@@ -455,14 +487,14 @@ End Function
 '' SIG '' Sr8rbSyKFlwAAQABKRswCQYFKw4DAhoFAKBwMBAGCisG
 '' SIG '' AQQBgjcCAQwxAjAAMBkGCSqGSIb3DQEJAzEMBgorBgEE
 '' SIG '' AYI3AgEEMBwGCisGAQQBgjcCAQsxDjAMBgorBgEEAYI3
-'' SIG '' AgEVMCMGCSqGSIb3DQEJBDEWBBTF0xBOQv33b3G8bmXt
-'' SIG '' XHM0xeusATANBgkqhkiG9w0BAQEFAASCAQAtoioh1gmu
-'' SIG '' cp4yaGzo0qBMMfo6LeizxNC/IgnJdcS/yj6U7kmjZVEM
-'' SIG '' aJnq3ZDALOwj8BKMEsXznt5e4P0bt6mpsQU0J6ygILdE
-'' SIG '' i6zIalTXMmyqPxQ7Owj7cWq8F3ZfDYN97BC9UOeKq/7g
-'' SIG '' fAQQ/OyrKwEsT6moPtzlW0+oj6MTVjb/dzOX5dJPoaR/
-'' SIG '' DXMcdwhdI4hHN0aT+B1pL3jLVlWDM/mvZIDqdpQZnoeu
-'' SIG '' qgy2UqsFFDzX3mNTU9h+wstg04BVDaCknItMvOSLPygu
-'' SIG '' p3MT/HH+Vw4ytFLIrjYynNGvDavvTX4CKc9BiGuhHJKb
-'' SIG '' tZSnex6giCO9HnBydv77BTBx
+'' SIG '' AgEVMCMGCSqGSIb3DQEJBDEWBBSBD7wvphOaOF3Yzs/c
+'' SIG '' U/nK2Nua6DANBgkqhkiG9w0BAQEFAASCAQBBrQ6hGivr
+'' SIG '' 182izjC4WhHYC4jyk0iaQYewJcqvVu8m9vq0kep2u0nc
+'' SIG '' tBtrt+ZrKe/E8Y5NFqvhk6uQkKlZGIK5y2s24NFCMVC2
+'' SIG '' xM2vRjaRw9t8N1L+6znzORwzy62gVMyGMiiGrRe33pu1
+'' SIG '' fBtq92mU5qx9KQy01eFFUY3CrooZYY7jdQ7jUiiiVBH+
+'' SIG '' kxW5wkLaqjhvcG/ckyiYKGzFTJwXSGYpzd4euJXgMlKf
+'' SIG '' lUluWcSieRtFf3qRa9AqN9jKFDCbLj614B0R2iLvNz7u
+'' SIG '' AdYCswx9nO5f1TAnwGwn+2gO4yh1nmk/IUoEssxGBGmx
+'' SIG '' ivwDUu9lA1cH4g55Kj3aXR32
 '' SIG '' End signature block
