@@ -9,10 +9,10 @@
 salt = "one"
 
 If WScript.Arguments.Count <> 2 Then
-Wscript.Echo( "USAGE: " & WScript.ScriptName & " " & _
-Chr(34) & "SourceFile.EXT" & Chr(34) & " " & _
-Chr(34) & "CreateFile.EXT" & Chr(34) )
-WScript.Quit()
+  Wscript.Echo( "USAGE: " & WScript.ScriptName & " " & _
+  Chr(34) & "SourceFile.EXT" & Chr(34) & " " & _
+  Chr(34) & "CreateFile.EXT" & Chr(34) )
+  WScript.Quit()
 End If
 
 ' Comment: StrFileName (.XML path & file name) to obfuscate, result (XML), and types (Blue Prism stages)
@@ -37,195 +37,195 @@ Set stages = xmlDoc.selectNodes("/process/stage")
 
 For Each stage in stages
 
-xmlDoc2.loadXML( stage.xml )
+  xmlDoc2.loadXML( stage.xml )
 
-' Comment: Type of Blue Prism Stage
-If InStr( types, ( "|" & stage.getAttribute("type") & "|" )) > 0 Then
-  
-' xmlDoc2.selectSingleNode("stage/displayx").Text = Int((rndMax-rndMin+1)*Rnd+rndMin)
-' xmlDoc2.selectSingleNode("stage/displayy").Text = Int((rndMax-rndMin+1)*Rnd+rndMin)
-' xmlDoc2.selectSingleNode("stage/displayheight").Text = rndHgt
-' xmlDoc2.selectSingleNode("stage/displaywidth").Text = rndWdt
-  
-  nameAttribVal = stage.getAttribute("name")
-  Set narrative = xmlDoc2.selectSingleNode("stage/narrative")
-  Set exposure = xmlDoc2.selectSingleNode("stage/exposure")
-  exposureValue = ""
-  
-  If Not narrative Is Nothing Then
-   xmlDoc2.selectSingleNode("stage/narrative").Text = ""
-  End If
-  
-  If Not exposure Is Nothing Then
-   exposureValue = xmlDoc2.selectSingleNode("stage/exposure").Text
-  End If
-  
-  If ( Not exposureValue = "Environment" ) Then
-   xmlDoc2.selectSingleNode("stage").setAttribute  "name", toNameCharFormat(hashString(nameAttribVal))
-  End If
-  
-' Comment: Type of Blue Prism Stage
-ElseIf Not InStr( "|Start|End|", ( "|" & stage.getAttribute("type") & "|" )) > 0  Then
-  
+  ' Comment: Type of Blue Prism Stage
+  If InStr( types, ( "|" & stage.getAttribute("type") & "|" )) > 0 Then
+
+    ' xmlDoc2.selectSingleNode("stage/displayx").Text = Int((rndMax-rndMin+1)*Rnd+rndMin)
+    ' xmlDoc2.selectSingleNode("stage/displayy").Text = Int((rndMax-rndMin+1)*Rnd+rndMin)
+    ' xmlDoc2.selectSingleNode("stage/displayheight").Text = rndHgt
+    ' xmlDoc2.selectSingleNode("stage/displaywidth").Text = rndWdt
+
+    nameAttribVal = stage.getAttribute("name")
+    Set narrative = xmlDoc2.selectSingleNode("stage/narrative")
+    Set exposure = xmlDoc2.selectSingleNode("stage/exposure")
+    exposureValue = ""
+
+    If Not narrative Is Nothing Then
+      xmlDoc2.selectSingleNode("stage/narrative").Text = ""
+    End If
+
+    If Not exposure Is Nothing Then
+        exposureValue = xmlDoc2.selectSingleNode("stage/exposure").Text
+    End If
+
+    If ( Not exposureValue = "Environment" ) Then
+        xmlDoc2.selectSingleNode("stage").setAttribute  "name", toNameCharFormat(hashString(nameAttribVal))
+   End If
+    
+  ' Comment: Type of Blue Prism Stage
+  ElseIf Not InStr( "|Start|End|", ( "|" & stage.getAttribute("type") & "|" )) > 0  Then
+
   result = result & stage.xml
-  
-End If
 
-If stage.getAttribute("type") = "Collection" Then
-  
-  prepend = "*/"
-  resultCount = 1
-  source = xmlDoc2.xml
-  target = xmlDoc2.xml
-  
-  While resultCount > 0
-   Set fields = stage.selectNodes(prepend & "field[@name]")
-   resultCount = fields.Length
-  
-   For Each field in fields
-    temp = Replace( field.xml, Chr(34) & field.getAttribute("name") & Chr(34), Chr(34) & toNameCharFormat(hashString(field.getAttribute("name")))  & Chr(34))
-    target = Replace( target, field.xml, temp)
-   Next
-   prepend = "*/" & prepend
-  
-  WEnd
-  
-  xmlDoc2.loadXML( target )
-  
-End If
+  End If
+
+ If stage.getAttribute("type") = "Collection" Then
+ 
+    prepend = "*/"
+    resultCount = 1
+    source = xmlDoc2.xml
+    target = xmlDoc2.xml
+
+While resultCount > 0
+    Set fields = stage.selectNodes(prepend & "field[@name]")
+resultCount = fields.Length
+
+For Each field in fields
+        temp = Replace( field.xml, Chr(34) & field.getAttribute("name") & Chr(34), Chr(34) & toNameCharFormat(hashString(field.getAttribute("name")))  & Chr(34))
+        target = Replace( target, field.xml, temp)
+        Next
+        prepend = "*/" & prepend
+
+    WEnd
+
+xmlDoc2.loadXML( target )
+
+  End If
 
 
-' Comment: Type of Blue Prism Stage
-If stage.getAttribute("type") = "Calculation" Then
-  
-  name = xmlDoc2.selectSingleNode("stage/calculation").getAttribute("stage")
-  xmlDoc2.selectSingleNode("stage/calculation").setAttribute "stage", toNameCharFormat(hashString(name))
-  expression = xmlDoc2.selectSingleNode("stage/calculation").getAttribute("expression")
-  xmlDoc2.selectSingleNode("stage/calculation").setAttribute "expression", hashDataNames(expression)
-  
-End If
+  ' Comment: Type of Blue Prism Stage
+  If stage.getAttribute("type") = "Calculation" Then
 
-If stage.getAttribute("type") = "Decision" Then
-  
-  expression = xmlDoc2.selectSingleNode("stage/decision").getAttribute("expression")
-  xmlDoc2.selectSingleNode("stage/decision").setAttribute "expression", hashDataNames(expression)
-  
-End If
+    name = xmlDoc2.selectSingleNode("stage/calculation").getAttribute("stage")
+    xmlDoc2.selectSingleNode("stage/calculation").setAttribute "stage", toNameCharFormat(hashString(name))
+    expression = xmlDoc2.selectSingleNode("stage/calculation").getAttribute("expression")
+    xmlDoc2.selectSingleNode("stage/calculation").setAttribute "expression", hashDataNames(expression)
 
-If stage.getAttribute("type") = "LoopStart" Then
-  
-  loopData = xmlDoc2.selectSingleNode("stage/loopdata").Text
-  xmlDoc2.selectSingleNode("stage/loopdata").Text = toNameCharFormat(hashString(loopData))
-  
-End If
+  End If
 
-If InStr( "|ChoiceStart|WaitStart|", ( "|" & stage.getAttribute("type") & "|" )) > 0  Then
+  If stage.getAttribute("type") = "Decision" Then
+
+    expression = xmlDoc2.selectSingleNode("stage/decision").getAttribute("expression")
+    xmlDoc2.selectSingleNode("stage/decision").setAttribute "expression", hashDataNames(expression)
+
+  End If
   
-  Set choices = xmlDoc2.selectNodes("stage/choices/choice")
-  
-  For Each choice in choices
-  
-   name = choice.selectSingleNode("name").Text
-   choice.selectSingleNode("name").Text = toNameCharFormat(hashString(name))
-  
-   If stage.getAttribute("type") = "ChoiceStart" Then
-    
-    expr = choice.getAttribute("expression")
-    choice.setAttribute "expression", hashDataNames(expr)
-    
-   ElseIf stage.getAttribute("type") = "WaitStart" Then
-    
-    Set params = choice.selectNodes("element/elementparameter")
-    
-    For Each param in params
-    
-     paramName = param.selectSingleNode("name").Text
-     param.selectSingleNode("name").Text = toNameCharFormat(hashString(paramName))
-    
-     paramExpr = param.selectSingleNode("expression").Text
-     param.selectSingleNode("expression").Text = hashDataNames(paramExpr)
-    
+  If stage.getAttribute("type") = "LoopStart" Then
+
+    loopData = xmlDoc2.selectSingleNode("stage/loopdata").Text
+    xmlDoc2.selectSingleNode("stage/loopdata").Text = toNameCharFormat(hashString(loopData))
+
+  End If
+
+  If InStr( "|ChoiceStart|WaitStart|", ( "|" & stage.getAttribute("type") & "|" )) > 0  Then
+
+    Set choices = xmlDoc2.selectNodes("stage/choices/choice")
+
+    For Each choice in choices
+
+      name = choice.selectSingleNode("name").Text
+      choice.selectSingleNode("name").Text = toNameCharFormat(hashString(name))
+
+        If stage.getAttribute("type") = "ChoiceStart" Then
+
+            expr = choice.getAttribute("expression")
+            choice.setAttribute "expression", hashDataNames(expr)
+
+        ElseIf stage.getAttribute("type") = "WaitStart" Then
+
+            Set params = choice.selectNodes("element/elementparameter")
+
+            For Each param in params
+
+                paramName = param.selectSingleNode("name").Text
+                param.selectSingleNode("name").Text = toNameCharFormat(hashString(paramName))
+
+                paramExpr = param.selectSingleNode("expression").Text
+                param.selectSingleNode("expression").Text = hashDataNames(paramExpr)
+
+            Next
+        
+        End If
+
     Next
-    
-   End If
-  
-  Next
-  
-End If
 
-If InStr( "|Navigate|Read|Write|", ( "|" & stage.getAttribute("type") & "|" )) > 0  Then
+  End If
   
-  Set params = xmlDoc2.selectNodes("stage/step/element/elementparameter")
-  
-  For Each param in params
-   expression = param.selectSingleNode("expression").Text
-   param.selectSingleNode("expression").Text = hashDataNames(expression)
-  Next
-  
-  Set args = xmlDoc2.selectNodes("stage/step/action/arguments/argument")
-  
-  For Each arg in args
-   value = arg.selectSingleNode("value").Text
-   arg.selectSingleNode("value").Text = hashDataNames(value)
-  Next
-  
-End If
+  If InStr( "|Navigate|Read|Write|", ( "|" & stage.getAttribute("type") & "|" )) > 0  Then
 
-If InStr( "|Start|Action|", ( "|" & stage.getAttribute("type") & "|" )) > 0  Then
-  
-  Set inputs = xmlDoc2.selectNodes("stage/inputs/input")
-  
-  For Each input in inputs
-  
-   If stage.getAttribute("type") = "Start" Then
-    
-    stageName = input.getAttribute("stage")
-    input.setAttribute "stage", toNameCharFormat( hashString( stageName ) )
-    
-   End If
-  
-   If stage.getAttribute("type") = "Action" Then
-    
-    expr = input.getAttribute("expr")
-    input.setAttribute "expr", hashDataNames( expr )
-    input.setAttribute "narrative", ""
-    
-   End If
-  
-  Next
-  
-End If
+    Set params = xmlDoc2.selectNodes("stage/step/element/elementparameter")
 
-If InStr( "|End|Action|", ( "|" & stage.getAttribute("type") & "|" )) > 0  Then
-  
-  Set outputs = xmlDoc2.selectNodes("stage/outputs/output")
-  
-  For Each output in outputs
-  
-  
-   stageName = output.getAttribute("stage")
-   output.setAttribute "stage", toNameCharFormat( hashString( stageName ) )
-  
-' If stage.getAttribute("type") = "Action" Then
-  
-' expr = output.getAttribute("expr")
-' output.setAttribute "expr", hashDataNames( expr )
-' output.setAttribute "narrative", ""
-' End If
-  
-  Next
-  
-End If
+    For Each param in params
+        expression = param.selectSingleNode("expression").Text
+        param.selectSingleNode("expression").Text = hashDataNames(expression)
+    Next
 
-If stage.getAttribute("type") = "Exception" Then
-  
-  Set exception = xmlDoc2.selectSingleNode("stage/exception")
-  detail = exception.getAttribute("detail")
-  exception.setAttribute "detail", hashDataNames( detail )
-  
-End If
+    Set args = xmlDoc2.selectNodes("stage/step/action/arguments/argument")
 
-result = result & xmlDoc2.xml
+    For Each arg in args
+        value = arg.selectSingleNode("value").Text
+        arg.selectSingleNode("value").Text = hashDataNames(value)
+    Next
+
+  End If
+
+  If InStr( "|Start|Action|", ( "|" & stage.getAttribute("type") & "|" )) > 0  Then
+
+    Set inputs = xmlDoc2.selectNodes("stage/inputs/input")
+
+    For Each input in inputs
+
+      If stage.getAttribute("type") = "Start" Then
+
+        stageName = input.getAttribute("stage")
+        input.setAttribute "stage", toNameCharFormat( hashString( stageName ) )
+
+      End If
+
+      If stage.getAttribute("type") = "Action" Then
+
+        expr = input.getAttribute("expr")
+        input.setAttribute "expr", hashDataNames( expr )
+        input.setAttribute "narrative", ""
+
+      End If
+
+    Next
+
+  End If
+
+  If InStr( "|End|Action|", ( "|" & stage.getAttribute("type") & "|" )) > 0  Then
+
+    Set outputs = xmlDoc2.selectNodes("stage/outputs/output")
+
+    For Each output in outputs
+
+
+        stageName = output.getAttribute("stage")
+        output.setAttribute "stage", toNameCharFormat( hashString( stageName ) )
+      
+        ' If stage.getAttribute("type") = "Action" Then
+
+        ' expr = output.getAttribute("expr")
+        ' output.setAttribute "expr", hashDataNames( expr )
+        ' output.setAttribute "narrative", ""
+      ' End If
+
+    Next
+
+  End If
+
+  If stage.getAttribute("type") = "Exception" Then
+
+    Set exception = xmlDoc2.selectSingleNode("stage/exception")
+    detail = exception.getAttribute("detail")
+    exception.setAttribute "detail", hashDataNames( detail )
+
+  End If
+
+  result = result & xmlDoc2.xml
 
 Next
 
@@ -236,46 +236,46 @@ Const ForAppending = 8
 
 Set objTextFile = objFSO.OpenTextFile(WScript.Arguments(1), ForWriting, True)
 
-' Writes strText every time you run this VBScript
-objTextFile.Write(result)
-objTextFile.Close
-Set ObjFso = Nothing
+  ' Writes strText every time you run this VBScript
+  objTextFile.Write(result)
+  objTextFile.Close
+  Set ObjFso = Nothing
 
 function toAlphaOnly( string )
 
-alphaChars = ""
+  alphaChars = ""
 
-Set re = New RegExp
-With re
-  .Pattern    = "[A-z]"
-  .IgnoreCase = False
-  .Global     = True
-End With
+  Set re = New RegExp
+  With re
+     .Pattern    = "[A-z]"
+     .IgnoreCase = False
+     .Global     = True
+  End With
 
-Set chars = re.Execute( string )
+  Set chars = re.Execute( string )
 
-For Each char in chars
-  alphaChars = alphaChars & char.Value
-Next
+  For Each char in chars
+    alphaChars = alphaChars & char.Value
+  Next
 
-toAlphaOnly = alphaChars
+  toAlphaOnly = alphaChars
 end function
 
 function toNameCharFormat( string )
 
 format = ""
-Set re = New RegExp
-With re
-  .Pattern    = "[A-z][A-z0-9]*"
-  .IgnoreCase = False
-  .Global     = True
-End With
+  Set re = New RegExp
+  With re
+     .Pattern    = "[A-z][A-z0-9]*"
+     .IgnoreCase = False
+     .Global     = True
+  End With
 
-Set matches = re.Execute( string )
+  Set matches = re.Execute( string )
 
-For Each match in matches
-  format = format & match.Value
-Next
+ For Each match in matches
+    format = format & match.Value
+  Next
 
 toNameCharFormat = format
 
@@ -283,26 +283,30 @@ end function
 
 function hashDataNames( string )
 
-Set re = New RegExp
-With re
-  .Pattern    = "[\.\[]?([A-z][A-z0-9\s\-]*[A-z0-9])[\.\]]"
-  .IgnoreCase = False
-  .Global     = True
-End With
-Set matches = re.Execute( string )
+string =  "" & string & ""
+WScript.Echo string
 
-For Each match in matches
-  
-  matchText = match.value
-  
-  For Each subMatch in match.Submatches
-  
-   matchText = Replace( matchText, subMatch, toNameCharFormat( hashString( subMatch ) ) )
-  
-  Next    
-  string = Replace( string, match.value, matchText)
-  
-Next
+  Set re = New RegExp
+  With re
+     .Pattern    = "[\.\[]?([A-z][A-z0-9\s\-]*[A-z0-9])[\.\]]"
+     .IgnoreCase = False
+     .Global     = True
+  End With
+  Set matches = re.Execute( string )
+
+  For Each match in matches
+
+    matchText = match.value
+
+    For Each subMatch in match.Submatches
+
+
+        matchText = Replace( matchText, subMatch, toNameCharFormat( hashString( subMatch ) ) )
+
+    Next    
+    string = Replace( string, match.value, matchText)
+
+  Next
 
 hashDataNames = string
 
@@ -311,82 +315,82 @@ end function
 
 function hashString( string )
 
-hashString = BytesToBase64(md5hashBytes(stringToUTFBytes(salt & string)))
+  hashString = BytesToBase64(md5hashBytes(stringToUTFBytes(salt & string)))
 
 end function
 
 function md5hashBytes(aBytes)
 
-Dim MD5
-set MD5 = CreateObject("System.Security.Cryptography.MD5CryptoServiceProvider")
+    Dim MD5
+    set MD5 = CreateObject("System.Security.Cryptography.MD5CryptoServiceProvider")
 
-MD5.Initialize()
-'Note you MUST use computehash_2 to get the correct version of this method, and the bytes MUST be double wrapped in brackets to ensure they get passed in correctly.
-md5hashBytes = MD5.ComputeHash_2( (aBytes) )
+    MD5.Initialize()
+    'Note you MUST use computehash_2 to get the correct version of this method, and the bytes MUST be double wrapped in brackets to ensure they get passed in correctly.
+    md5hashBytes = MD5.ComputeHash_2( (aBytes) )
 
 end function
 
 function sha1hashBytes(aBytes)
 
-Dim sha1
-set sha1 = CreateObject("System.Security.Cryptography.SHA1Managed")
+    Dim sha1
+    set sha1 = CreateObject("System.Security.Cryptography.SHA1Managed")
 
-sha1.Initialize()
-'Note you MUST use computehash_2 to get the correct version of this method, and the bytes MUST be double wrapped in brackets to ensure they get passed in correctly.
-sha1hashBytes = sha1.ComputeHash_2( (aBytes) )
+    sha1.Initialize()
+    'Note you MUST use computehash_2 to get the correct version of this method, and the bytes MUST be double wrapped in brackets to ensure they get passed in correctly.
+    sha1hashBytes = sha1.ComputeHash_2( (aBytes) )
 
 end function
 
 function sha256hashBytes(aBytes)
 
-Dim sha256
-set sha256 = CreateObject("System.Security.Cryptography.SHA256Managed")
+    Dim sha256
+    set sha256 = CreateObject("System.Security.Cryptography.SHA256Managed")
 
-sha256.Initialize()
-'Note you MUST use computehash_2 to get the correct version of this method, and the bytes MUST be double wrapped in brackets to ensure they get passed in correctly.
-sha256hashBytes = sha256.ComputeHash_2( (aBytes) )
+    sha256.Initialize()
+    'Note you MUST use computehash_2 to get the correct version of this method, and the bytes MUST be double wrapped in brackets to ensure they get passed in correctly.
+    sha256hashBytes = sha256.ComputeHash_2( (aBytes) )
 
 end function
 
 function stringToUTFBytes(aString)
 
-Dim UTF8
-Set UTF8 = CreateObject("System.Text.UTF8Encoding")
-stringToUTFBytes = UTF8.GetBytes_4(aString)
+    Dim UTF8
+    Set UTF8 = CreateObject("System.Text.UTF8Encoding")
+    stringToUTFBytes = UTF8.GetBytes_4(aString)
 
 end function
 
 function bytesToHex(aBytes)
 
-dim hexStr, x
-for x=1 to lenb(aBytes)
-  hexStr= hex(ascb(midb( (aBytes),x,1)))
-  if len(hexStr)=1 then hexStr="0" & hexStr
-  bytesToHex=bytesToHex & hexStr
-next
+    dim hexStr, x
+    for x=1 to lenb(aBytes)
+        hexStr= hex(ascb(midb( (aBytes),x,1)))
+        if len(hexStr)=1 then hexStr="0" & hexStr
+        bytesToHex=bytesToHex & hexStr
+    next
 
 end function
 
 Function BytesToBase64(varBytes)
 
-With CreateObject("MSXML2.DomDocument").CreateElement("b64")
-  .dataType = "bin.base64"
-  .nodeTypedValue = varBytes
-  BytesToBase64 = .Text
-End With
+    With CreateObject("MSXML2.DomDocument").CreateElement("b64")
+        .dataType = "bin.base64"
+        .nodeTypedValue = varBytes
+        BytesToBase64 = .Text
+    End With
 
 End Function
 
 Function GetBytes(sPath)
 
-With CreateObject("Adodb.Stream")
-  .Type = 1 ' adTypeBinary
-  .Open
-  .LoadFromFile sPath
-  .Position = 0
-  GetBytes = .Read
-  .Close
-End With
+    With CreateObject("Adodb.Stream")
+        .Type = 1 ' adTypeBinary
+        .Open
+        .LoadFromFile sPath
+        .Position = 0
+        GetBytes = .Read
+        .Close
+    End With
 
 End Function
 '' SIG '' Begin signature block
